@@ -1,6 +1,6 @@
-# cloudflare-worker-boilerplate
+# telefy
 
-A batteries-included [Hono](https://hono.dev/) boilerplate for [Cloudflare Workers](https://workers.cloudflare.com/) with [OpenAPI Swagger UI](https://swagger.io/specification/).
+`telefy` is a Cloudflare Worker that submits generic notifications to the Telegram API.
 
 ## Development
 
@@ -8,18 +8,4 @@ Install all dependencies.
 
 ```bash
 bun install
-```
-
-## Testing
-
-Run your tests with hot reloading.
-
-```bash
-bun run test
-```
-
-Run your tests without hot reloading. For testing in a CI pipeline.
-
-```bash
-bun test
 ```

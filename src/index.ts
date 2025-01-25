@@ -1,5 +1,7 @@
+import { notification } from '@/routes/notification'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OpenAPIHono } from '@hono/zod-openapi'
+import { bearerAuth } from 'hono/bearer-auth'
 import { cors } from 'hono/cors'
 
 function main() {
@@ -12,8 +14,17 @@ function main() {
     },
   })
 
-  app.get('/docs', swaggerUI({ url: openapi_documentation_route }))
-  app.use(cors())
+  app.openAPIRegistry.registerComponent('securitySchemes', 'Bearer', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+  })
+
+  app
+    .get('/docs', swaggerUI({ url: openapi_documentation_route }))
+    .use(cors())
+    .use('/*', bearerAuth({ verifyToken: (token, context) => token === context.env.AUTH_TOKEN }))
+    .route('/', notification)
 
   return app
 }
