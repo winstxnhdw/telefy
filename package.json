@@ -6,7 +6,7 @@
     "test": "bun test --watch"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.5.1",
+    "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-openapi": "^0.19.8",
     "grammy": "^1.36.3",
     "hono": "^4.7.11",
@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@cloudflare/workers-types": "^4.20250606.0",
+    "@cloudflare/workers-types": "^4.20250607.0",
     "@types/bun": "latest",
     "wrangler": "^4.19.1"
   },
