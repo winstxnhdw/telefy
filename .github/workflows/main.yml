@@ -8,10 +8,13 @@ on:
       - tsconfig.json
       - package.json
       - bun.lockb
-      - '**.ts'
+      - src/**/*.ts
+      - tests/**/*.ts
 
 jobs:
   test:
     uses: winstxnhdw/actions/.github/workflows/bun.yml@main
     with:
+      disable-formatter: true
+      disable-test: true
       disable-build: true

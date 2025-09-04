@@ -11,9 +11,7 @@ export function notification() {
     body: Notification,
     detail: { security: [{ bearerAuth: [] }] },
     beforeHandle({ env, bearer, set, status }) {
-      if (bearer === env.AUTH_TOKEN) {
-        return;
-      }
+      if (bearer === env.AUTH_TOKEN) return;
 
       set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
       return status(401, 'Unauthorized');
