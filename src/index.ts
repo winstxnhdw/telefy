@@ -43,7 +43,7 @@ function main(env: Bindings) {
     ],
   });
 
-  return new Elysia({ aot: false })
+  return new Elysia({ normalize: false, aot: false })
     .decorate('env', env)
     .use(openTelemetry)
     .use(scalarPlugin)
