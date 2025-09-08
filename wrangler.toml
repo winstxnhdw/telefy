@@ -8,3 +8,9 @@ send_metrics = false
 
 [placement]
 mode = "smart"
+
+[vars]
+OTEL_TRACES_EXPORTER="otlp"
+OTEL_EXPORTER_OTLP_ENDPOINT="https://otlp-gateway-prod-ap-southeast-1.grafana.net/otlp"
+OTEL_RESOURCE_ATTRIBUTES="service.name=telefy,service.namespace=workers,deployment.environment=production"
+OTEL_NODE_RESOURCE_DETECTORS="env,host,os"

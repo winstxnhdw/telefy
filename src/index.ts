@@ -31,16 +31,7 @@ function main(env: Bindings) {
   });
 
   const openTelemetry = opentelemetry({
-    spanProcessors: [
-      new BatchSpanProcessor(
-        new OTLPTraceExporter({
-          url: env.OTEL_EXPORTER_OTLP_ENDPOINT,
-          headers: {
-            Authorization: env.OTEL_EXPORTER_OTLP_TOKEN,
-          },
-        }),
-      ),
-    ],
+    spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
   });
 
   return new Elysia({ normalize: false, aot: false })

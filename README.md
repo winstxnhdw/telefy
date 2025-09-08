@@ -15,6 +15,7 @@ Populate the following environment variables in your Cloudflare Worker
     echo "AUTH_TOKEN=$AUTH_TOKEN"
     echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN"
     echo "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID"
+    echo "OTEL_EXPORTER_OTLP_HEADERS=$OTEL_EXPORTER_OTLP_HEADERS"
 } >> .env
 ```
 
