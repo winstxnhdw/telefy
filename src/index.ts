@@ -1,8 +1,8 @@
+import { notification } from '@/notification';
+import type { Bindings } from '@/types/bindings';
 import { cors } from '@elysiajs/cors';
 import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
-import { notification } from '@/notification';
-import type { Bindings } from '@/types/bindings';
 
 function main(env: Bindings) {
   const openapiDocumentationRoute = '/openapi.json';
@@ -27,7 +27,7 @@ function main(env: Bindings) {
     },
   });
 
-  return new Elysia({ aot: false }).decorate('env', env).use(scalarPlugin).use(cors()).use(notification());
+  return new Elysia({ normalize: false, aot: false }).decorate('env', env).use(scalarPlugin).use(cors()).use(notification());
 }
 
 export default {
