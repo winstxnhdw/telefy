@@ -2,21 +2,22 @@ import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
 import { notify } from '@/notification/service';
 import { Notification } from '@/notification/types';
-import type { Bindings } from '@/types/bindings';
+import type { Bindings } from '@/types';
 
 export function notification() {
-  const controller = new Elysia().use(bearer()).decorate('env', null as unknown as Bindings);
+  const controller = new Elysia()
+    .use(bearer())
+    .decorate('env', null as unknown as Bindings)
+    .post('/', ({ env, body }) => notify(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, body), {
+      body: Notification,
+      detail: { security: [{ bearerAuth: [] }] },
+      beforeHandle({ env, bearer, set, status }) {
+        if (bearer === env.AUTH_TOKEN) return;
 
-  controller.post('/', ({ env, body }) => notify(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, body), {
-    body: Notification,
-    detail: { security: [{ bearerAuth: [] }] },
-    beforeHandle({ env, bearer, set, status }) {
-      if (bearer === env.AUTH_TOKEN) return;
-
-      set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
-      return status(401, 'Unauthorized');
-    },
-  });
+        set.headers['WWW-Authenticate'] = `Bearer realm='sign', error="invalid_request"`;
+        return status(401, 'Unauthorized');
+      },
+    });
 
   return controller;
 }
