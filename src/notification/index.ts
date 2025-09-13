@@ -1,7 +1,7 @@
 import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
 import { notify } from '@/notification/service';
-import { Notification } from '@/notification/types';
+import { NotificationSchema } from '@/notification/types';
 import type { Bindings } from '@/types';
 
 export function notification() {
@@ -9,7 +9,7 @@ export function notification() {
     .use(bearer())
     .decorate('env', null as unknown as Bindings)
     .post('/', ({ env, body }) => notify(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, body), {
-      body: Notification,
+      body: NotificationSchema,
       detail: { security: [{ bearerAuth: [] }] },
       beforeHandle({ env, bearer, set, status }) {
         if (bearer === env.AUTH_TOKEN) return;
