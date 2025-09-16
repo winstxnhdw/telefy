@@ -3,7 +3,18 @@ import telegramify from 'telegramify-markdown';
 import type { NotificationSchema } from '@/notification/types';
 
 export async function notify(botToken: string, chatId: string, notification: typeof NotificationSchema.static) {
-  const bot = new Bot(botToken);
+  const bot = new Bot(botToken, {
+    id: 7983020807,
+    is_bot: true,
+    first_name: 'telefy',
+    username: 'telefynotifybot',
+    can_join_groups: true,
+    can_read_all_group_messages: false,
+    supports_inline_queries: false,
+    can_connect_to_business: false,
+    has_main_web_app: true,
+  });
+
   const attachments = notification.attachments ?? [];
   const message = `*${telegramify(notification.subject.toUpperCase(), 'escape')}*\\-\\-\\-\n${telegramify(notification.body, 'escape')}`;
 
