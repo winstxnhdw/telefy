@@ -9,6 +9,7 @@ export function notification() {
     .use(bearer())
     .decorate('env', null as unknown as Bindings)
     .post('/', ({ env, body }) => notify(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, body), {
+      parse: 'multipart/form-data',
       body: NotificationSchema,
       detail: { security: [{ Bearer: [] }] },
       beforeHandle({ env, bearer, set, status }) {

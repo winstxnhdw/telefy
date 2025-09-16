@@ -24,6 +24,7 @@
 > | ----------- | -------- | ---------------| ----------------------------- |
 > | subject     | required | `string`       | notification subject          |
 > | body        | required | `string`       | notification body             |
+> | attachments | optional | `File[]`       | array of files to attach      |
 
 ### Responses
 
@@ -36,11 +37,12 @@
 ### Example cURL
 
 > ```bash
-> curl $TELEFY_ENDPOINT -H "Content-Type: application/json" -H "Authorization: Bearer $AUTH_TOKEN" -d \
-> '{
->    "subject": "Hello World",
->    "body": "This is the body of the notification."
->  }'
+> curl $TELEFY_ENDPOINT
+>   -H "Authorization: Bearer $AUTH_TOKEN" \
+>   -F "subject=Hello World" \
+>   -F "body=This is the body of the notification." \
+>   -F "attachments=@/path/to/file1" \
+>   -F "attachments=@/path/to/file2"
 > ```
 
 ## Setup
