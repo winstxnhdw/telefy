@@ -2,22 +2,23 @@ import { describe, expect, it, mock } from 'bun:test';
 import { treaty } from '@elysiajs/eden';
 import { app } from '@/app';
 
-function get_auth_token() {
+function getAuthToken() {
   return 'Valid AUTH_TOKEN';
 }
 
-function create_app() {
+function createApp() {
   const api = app({
     TELEGRAM_BOT_TOKEN: 'TELEGRAM_BOT_TOKEN',
     TELEGRAM_CHAT_ID: 'TELEGRAM_CHAT_ID',
-    AUTH_TOKEN: get_auth_token(),
+    AUTH_TOKEN: getAuthToken(),
   });
 
   return treaty(api);
 }
 
 describe('notification', () => {
-  const api = create_app();
+  const api = createApp();
+  const fileStub = new File(['file contents'], 'file.txt', { type: 'text/plain' });
 
   mock.module('@/notification/service', () => {
     return {
@@ -27,7 +28,7 @@ describe('notification', () => {
 
   it('Incorrect AUTH_TOKEN should be rejected', async () => {
     const { status } = await api.post(
-      { subject: 'Title', body: 'Hello!' },
+      { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
       { headers: { Authorization: 'Invalid AUTH_TOKEN' } },
     );
 
@@ -35,10 +36,12 @@ describe('notification', () => {
   });
 
   it('Correct AUTH_TOKEN should be accepted', async () => {
-    const { status } = await api.post(
-      { subject: 'Title', body: 'Hello!' },
-      { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${get_auth_token()}` } },
+    const { status, error } = await api.post(
+      { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
+      { headers: { Authorization: `Bearer ${getAuthToken()}` } },
     );
+
+    console.log(error);
 
     expect(status).toBe(200);
   });
