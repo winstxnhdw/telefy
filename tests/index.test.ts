@@ -41,8 +41,6 @@ describe('notification', () => {
       { headers: { Authorization: `Bearer ${getAuthToken()}` } },
     );
 
-    console.log(error);
-
     expect(status).toBe(200);
   });
 });
