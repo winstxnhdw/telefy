@@ -36,7 +36,7 @@ describe('notification', () => {
   });
 
   it('Correct AUTH_TOKEN should be accepted', async () => {
-    const { status, error } = await api.post(
+    const { status } = await api.post(
       { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
       { headers: { Authorization: `Bearer ${getAuthToken()}` } },
     );
