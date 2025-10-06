@@ -39,10 +39,21 @@
 > ```bash
 > curl $TELEFY_ENDPOINT
 >   -H "Authorization: Bearer $AUTH_TOKEN" \
->   -F "subject=Hello World" \
+>   -F "subject=Title" \
 >   -F "body=This is the body of the notification." \
 >   -F "attachments=@/path/to/file1" \
 >   -F "attachments=@/path/to/file2"
+> ```
+
+### Example HTTPX
+
+> ```python
+> async with AsyncClient() as client:
+>     await client.post(env['TELEFY_ENDPOINT'],
+>         headers={"Authorization": f"Bearer {env['AUTH_TOKEN']}"},
+>         data={"subject": "Hello World", "body": "This is the body of the notification."},
+>         files=[("attachments", ("image.jpg", image, "image/jpeg"))],
+>     )
 > ```
 
 ## Setup
