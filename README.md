@@ -45,6 +45,19 @@
 >   -F "attachments=@/path/to/file2"
 > ```
 
+### Example AIOHTTP
+
+> ```python
+> async with ClientSession(headers={'Authorization': f'Bearer {env["AUTH_TOKEN"]}'}) as session:
+>     form_data = FormData()
+>     form_data.add_field('subject', 'Hello World')
+>     form_data.add_field('body', 'This is the body of the notification.')
+>     form_data.add_field('attachments', image, filename='image.jpg', content_type='image/jpeg')
+>
+>     async with session.post(env['TELEFY_ENDPOINT'], data=form_data) as response:
+>         response.raise_for_status()
+> ```
+
 ### Example HTTPX
 
 > ```python
