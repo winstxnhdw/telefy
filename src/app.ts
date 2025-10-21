@@ -27,9 +27,5 @@ export function app(env: Bindings) {
     },
   });
 
-  return new Elysia({ normalize: false, aot: false })
-    .decorate('env', env)
-    .use(scalarPlugin)
-    .use(cors())
-    .use(notification());
+  return new Elysia().decorate('env', env).use(scalarPlugin).use(cors()).use(notification());
 }
