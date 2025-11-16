@@ -24,11 +24,17 @@ export async function notify(botToken: string, chatId: string, notification: typ
   } else {
     const attachmentBytes = await Promise.all(attachments.map((file) => file.bytes()));
     const files = attachmentBytes.map((file, i) =>
-      InputMediaBuilder.document(
-        new InputFile(file, attachments[i]?.name),
-        i === attachments.length - 1 ? { caption: message, parse_mode: 'MarkdownV2' } : {},
-      ),
+      InputMediaBuilder.document(new InputFile(file, attachments[i]?.name)),
     );
+
+    const lastFile = files.at(-1);
+
+    if (lastFile === undefined) {
+      return;
+    }
+
+    lastFile.caption = message;
+    lastFile.parse_mode = 'MarkdownV2';
 
     await bot.api.sendMediaGroup(chatId, files);
   }
