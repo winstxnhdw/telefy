@@ -2,13 +2,15 @@ import { bearer } from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
 import { notify } from '@/notification/service';
 import { NotificationSchema } from '@/notification/types';
+import { grammy } from '@/plugins';
 import type { Bindings } from '@/types';
 
 export function notification() {
   const controller = new Elysia()
-    .use(bearer())
     .decorate('env', null as unknown as Bindings)
-    .post('/', ({ env, body }) => notify(env.TELEGRAM_BOT_TOKEN, env.TELEGRAM_CHAT_ID, body), {
+    .use(bearer())
+    .use(grammy())
+    .post('/', ({ env, body, bot }) => notify(bot, env.TELEGRAM_CHAT_ID, body), {
       parse: 'multipart/form-data',
       body: NotificationSchema,
       detail: { security: [{ Bearer: [] }] },
