@@ -1,6 +1,7 @@
 import { cors } from '@elysiajs/cors';
 import { openapi } from '@elysiajs/openapi';
 import { Elysia } from 'elysia';
+import { health } from '@/health';
 import { notification } from '@/notification';
 import type { Bindings } from '@/types';
 
@@ -27,5 +28,5 @@ export function app(env: Bindings) {
     },
   });
 
-  return new Elysia().decorate('env', env).use(scalarPlugin).use(cors()).use(notification());
+  return new Elysia().decorate('env', env).use(scalarPlugin).use(cors()).use(health()).use(notification());
 }
