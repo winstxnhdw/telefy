@@ -22,6 +22,7 @@ function factory({ env }: { env: GrammyEnv }) {
     bot: new Bot(env.TELEGRAM_BOT_TOKEN, { botInfo: botInfo }),
   };
 }
+
 export function grammy() {
   return new Elysia()
     .decorate('env', null as unknown as GrammyEnv)
