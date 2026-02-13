@@ -21,7 +21,6 @@ export function app(env: Bindings) {
           bearerAuth: {
             type: 'http',
             scheme: 'bearer',
-            bearerFormat: 'JWT',
           },
         },
       },
