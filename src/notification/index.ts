@@ -8,11 +8,13 @@ import type { Bindings } from '@/types';
 export function notification() {
   const controller = new Elysia()
     .decorate('env', null as unknown as Bindings)
+    .use(bearer())
     .use(grammy())
     .post('/', ({ env, body, bot }) => notify(bot, env.TELEGRAM_CHAT_ID, body), {
       parse: 'multipart/form-data',
       body: NotificationSchema,
       detail: { security: [{ Bearer: [] }] },
+      error: ({ error }) => (error instanceof Error ? error.message : String(error)),
       beforeHandle({ env, bearer, set, status }) {
         if (bearer === env.AUTH_TOKEN) return;
 
