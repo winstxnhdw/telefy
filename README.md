@@ -76,10 +76,14 @@ Populate the following environment variables in your Cloudflare Worker
 ```bash
 {
   echo "AUTH_TOKEN=$AUTH_TOKEN"
+  echo "OPENAPI_USERNAME=$OPENAPI_USERNAME"
+  echo "OPENAPI_PASSWORD=$OPENAPI_PASSWORD"
   echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN"
   echo "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID"
 } > .dev.vars
 ```
+
+The Scalar UI at `/schema/scalar` uses HTTP Basic authentication with `OPENAPI_USERNAME` and `OPENAPI_PASSWORD`.
 
 ## Development
 
