@@ -9,7 +9,6 @@ export function scalar() {
     scalar: { url: openapiDocumentationRoute },
     specPath: openapiDocumentationRoute,
     documentation: {
-      security: [{ bearerAuth: [] }],
       info: {
         title: 'telefy',
         version: '1.0.0',

@@ -1,140 +1,182 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test';
+import { describe, expect, it, mock } from 'bun:test';
 import { treaty } from '@elysiajs/eden';
 import { app } from '@/app';
-
-let notificationError: Error | undefined;
+import type { Bindings } from '@/types';
 
 mock.module('@/notification/service', () => ({
-  notify: async () => {
-    if (notificationError !== undefined) throw notificationError;
+  notify: async (_bot: unknown, _chatId: string, notification: { subject: string }) => {
+    if (notification.subject === 'Notification failed') throw new Error('Notification failed');
   },
 }));
 
-function getAuthToken() {
-  return 'Valid AUTH_TOKEN';
-}
+type OpenapiSpecification = {
+  paths: {
+    '/': { post: { security: Array<Record<string, unknown>> } };
+    '/health': { get: { security: Array<Record<string, unknown>> } };
+  };
+};
 
-function getOpenapiUsername() {
-  return 'Valid OPENAPI_USERNAME';
-}
-
-function getOpenapiPassword() {
-  return 'Valid OPENAPI_PASSWORD';
-}
-
-function getBindings() {
+function createBindings(): Bindings {
   return {
     TELEGRAM_BOT_TOKEN: 'TELEGRAM_BOT_TOKEN',
     TELEGRAM_CHAT_ID: 'TELEGRAM_CHAT_ID',
-    AUTH_TOKEN: getAuthToken(),
-    OPENAPI_USERNAME: getOpenapiUsername(),
-    OPENAPI_PASSWORD: getOpenapiPassword(),
+    AUTH_TOKEN: 'Valid AUTH_TOKEN',
+    OPENAPI_USERNAME: 'Valid OPENAPI_USERNAME',
+    OPENAPI_PASSWORD: 'Valid OPENAPI_PASSWORD',
   };
 }
 
-function createApp() {
-  return treaty(app(getBindings()));
+function createServer() {
+  return app(createBindings());
 }
 
-describe('OpenAPI', () => {
-  it('Requests without Basic authentication should be rejected', async () => {
-    const response = await app(getBindings()).handle(new Request('http://localhost/schema/scalar'));
+function createApi() {
+  return treaty(createServer());
+}
 
-    expect(response.status).toBe(401);
-    expect(response.headers.get('WWW-Authenticate')).toBe('Basic realm="OpenAPI", charset="UTF-8"');
+function createBasicHeaders() {
+  const bindings = createBindings();
+  return { Authorization: `Basic ${btoa(`${bindings.OPENAPI_USERNAME}:${bindings.OPENAPI_PASSWORD}`)}` };
+}
+
+function createBearerHeaders() {
+  return { Authorization: `Bearer ${createBindings().AUTH_TOKEN}` };
+}
+
+function createFileStub() {
+  return new File(['file contents'], 'file.txt', { type: 'text/plain' });
+}
+
+async function createOpenapiSpecification() {
+  const response = await createServer().handle(
+    new Request('http://localhost/openapi.json', { headers: createBasicHeaders() }),
+  );
+  const responseBody = await response.json();
+  return responseBody as OpenapiSpecification;
+}
+
+describe('Scalar', () => {
+  describe('when Basic credentials are missing', () => {
+    it('responds with an authentication challenge', async () => {
+      const response = await createServer().handle(new Request('http://localhost/schema/scalar'));
+
+      expect(response.status).toBe(401);
+      expect(response.headers.get('WWW-Authenticate')).toBe('Basic realm="OpenAPI", charset="UTF-8"');
+    });
   });
 
-  it('Correct Basic authentication should be accepted for the UI and specification', async () => {
-    const headers = { Authorization: `Basic ${btoa(`${getOpenapiUsername()}:${getOpenapiPassword()}`)}` };
-    const server = app(getBindings());
-    const [uiResponse, specificationResponse] = await Promise.all([
-      server.handle(new Request('http://localhost/schema/scalar', { headers })),
-      server.handle(new Request('http://localhost/openapi.json', { headers })),
-    ]);
+  describe('when Basic credentials are valid', () => {
+    it('serves the UI', async () => {
+      const response = await createServer().handle(
+        new Request('http://localhost/schema/scalar', { headers: createBasicHeaders() }),
+      );
 
-    expect(uiResponse.status).toBe(200);
-    expect(specificationResponse.status).toBe(200);
-  });
-});
-
-describe('health', () => {
-  const api = createApp();
-
-  it('Requests without an AUTH_TOKEN should be rejected', async () => {
-    const { status } = await api.health.get();
-
-    expect(status).toBe(401);
-  });
-
-  it('Correct AUTH_TOKEN should be accepted', async () => {
-    const { status } = await api.health.get({
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      expect(response.status).toBe(200);
     });
 
-    expect(status).toBe(200);
+    it('serves the OpenAPI specification', async () => {
+      const response = await createServer().handle(
+        new Request('http://localhost/openapi.json', { headers: createBasicHeaders() }),
+      );
+
+      expect(response.status).toBe(200);
+    });
   });
 });
 
-describe('notification', () => {
-  const api = createApp();
-  const fileStub = new File(['file contents'], 'file.txt', { type: 'text/plain' });
+describe('OpenAPI specification', () => {
+  it('describes health as requiring Bearer authentication', async () => {
+    const specification = await createOpenapiSpecification();
 
-  afterEach(() => {
-    notificationError = undefined;
+    expect(specification.paths['/health'].get.security).toEqual([{ bearerAuth: [] }]);
   });
 
-  it('Incorrect AUTH_TOKEN should be rejected', async () => {
-    const { status } = await api.post(
-      { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
-      { headers: { Authorization: 'Invalid AUTH_TOKEN' } },
-    );
+  it('describes notifications as requiring Bearer authentication', async () => {
+    const specification = await createOpenapiSpecification();
 
-    expect(status).toBe(401);
+    expect(specification.paths['/'].post.security).toEqual([{ bearerAuth: [] }]);
+  });
+});
+
+describe('GET /health', () => {
+  describe('when Bearer credentials are missing', () => {
+    it('rejects the request', async () => {
+      const { status } = await createApi().health.get();
+
+      expect(status).toBe(401);
+    });
   });
 
-  it('Correct AUTH_TOKEN should be accepted', async () => {
-    const { status } = await api.post(
-      { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
-      { headers: { Authorization: `Bearer ${getAuthToken()}` } },
-    );
+  describe('when Bearer credentials are valid', () => {
+    it('accepts the request', async () => {
+      const { status } = await createApi().health.get({ headers: createBearerHeaders() });
 
-    expect(status).toBe(200);
+      expect(status).toBe(200);
+    });
+  });
+});
+
+describe('POST /', () => {
+  describe('when Bearer credentials are invalid', () => {
+    it('rejects the request', async () => {
+      const { status } = await createApi().post(
+        { subject: 'Title', body: 'Hello!', attachments: [createFileStub()] },
+        { headers: { Authorization: 'Bearer Invalid AUTH_TOKEN' } },
+      );
+
+      expect(status).toBe(401);
+    });
   });
 
-  it('Long bodies without attachments should be accepted', async () => {
-    const form = new FormData();
-    form.set('subject', 'Title');
-    form.set('body', 'x'.repeat(4000));
+  describe('when Bearer credentials are valid', () => {
+    it('accepts the request', async () => {
+      const { status } = await createApi().post(
+        { subject: 'Title', body: 'Hello!', attachments: [createFileStub()] },
+        { headers: createBearerHeaders() },
+      );
 
-    const response = await app(getBindings()).handle(
-      new Request('http://localhost/', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-        body: form,
-      }),
-    );
-
-    expect(response.status).toBe(200);
+      expect(status).toBe(200);
+    });
   });
 
-  it('Long captions should be rejected', async () => {
-    const { status } = await api.post(
-      { subject: 'Title', body: 'x'.repeat(925), attachments: [fileStub] },
-      { headers: { Authorization: `Bearer ${getAuthToken()}` } },
-    );
+  describe('when the notification has no attachments', () => {
+    it('accepts a 4000-character body', async () => {
+      const form = new FormData();
+      form.set('subject', 'Title');
+      form.set('body', 'x'.repeat(4000));
 
-    expect(status).toBe(422);
+      const response = await createServer().handle(
+        new Request('http://localhost/', {
+          method: 'POST',
+          headers: createBearerHeaders(),
+          body: form,
+        }),
+      );
+
+      expect(response.status).toBe(200);
+    });
   });
 
-  it('Notification errors should be propagated', async () => {
-    notificationError = new Error('Notification failed');
+  describe('when the notification has attachments', () => {
+    it('rejects a caption longer than 924 characters', async () => {
+      const { status } = await createApi().post(
+        { subject: 'Title', body: 'x'.repeat(925), attachments: [createFileStub()] },
+        { headers: createBearerHeaders() },
+      );
 
-    const { error, status } = await api.post(
-      { subject: 'Title', body: 'Hello!', attachments: [fileStub] },
-      { headers: { Authorization: `Bearer ${getAuthToken()}` } },
-    );
+      expect(status).toBe(422);
+    });
+  });
 
-    expect(status).toBe(500);
-    expect(String(error?.value)).toBe('Error: Notification failed');
+  describe('when notification delivery fails', () => {
+    it('returns the error', async () => {
+      const { error, status } = await createApi().post(
+        { subject: 'Notification failed', body: 'Hello!', attachments: [createFileStub()] },
+        { headers: createBearerHeaders() },
+      );
+
+      expect(status).toBe(500);
+      expect(String(error?.value)).toBe('Error: Notification failed');
+    });
   });
 });

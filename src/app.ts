@@ -7,5 +7,7 @@ import { scalar } from '@/scalar';
 import type { Bindings } from '@/types';
 
 export function app(env: Bindings) {
-  return new Elysia().decorate('env', env).use(cors()).use(scalar()).use(auth()).use(health()).use(notification());
+  const api = new Elysia({ detail: { security: [{ bearerAuth: [] }] } }).use(auth()).use(health()).use(notification());
+  
+  return new Elysia().decorate('env', env).use(cors()).use(scalar()).use(api);
 }
