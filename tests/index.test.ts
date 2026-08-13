@@ -158,6 +158,15 @@ describe('POST /', () => {
   });
 
   describe('when the notification has attachments', () => {
+    it('rejects empty attachments', async () => {
+      const { status } = await createApi().post(
+        { subject: 'Title', body: 'Hello!', attachments: [new File([], 'empty.txt', { type: 'text/plain' })] },
+        { headers: createBearerHeaders() },
+      );
+
+      expect(status).toBe(422);
+    });
+
     it('rejects a caption longer than 924 characters', async () => {
       const { status } = await createApi().post(
         { subject: 'Title', body: 'x'.repeat(925), attachments: [createFileStub()] },

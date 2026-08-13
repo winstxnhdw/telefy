@@ -5,5 +5,5 @@ const body = (maxLength: number) => t.String({ examples: ['This is the body of t
 
 export const NotificationSchema = t.Union([
   t.Object({ subject, body: body(4000), attachments: t.Optional(t.Never()) }),
-  t.Object({ subject, body: body(924), attachments: t.Files({ minItems: 1 }) }),
+  t.Object({ subject, body: body(924), attachments: t.Files({ minItems: 1, minSize: 1 }) }),
 ]);
